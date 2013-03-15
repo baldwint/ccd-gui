@@ -4,7 +4,7 @@ Downloads spectra from the LabView CCD program running on another computer.
 """
 
 from wx_mpl_dynamic_graph import GraphFrame
-from save import Graph,IntGraph
+from save import Graph, IntGraph, sampledata
 #from spexgui import Spectrometer
 from wanglib.instruments import spex750m
 from wanglib.ccd import labview_client
@@ -60,17 +60,19 @@ if __name__ == "__main__":
     # get command line args
     args = parser.parse_args()
 
-    clnt = labview_client(center_wl=args.wl, host=args.ip)
+    if args.ip is not None:
+        clnt = labview_client(center_wl=args.wl, host=args.ip)
 
-    def fetch():
-        x,y = clnt.get_spectrum()
-        tr = 3  # truncate point
-        # only sum the middle rows
-        return x[tr:],y[6:9].sum(axis=0)[tr:]
-        # sum all CCD rows
-        #return x[tr:],y.sum(axis=0)[tr:]
-        # full grid
-        #return x[tr:],y.transpose()[tr:]
+        def fetch():
+            x,y = clnt.get_spectrum()
+            tr = 3  # truncate point
+            return x[tr:],y[6:9].sum(axis=0)[tr:] # only sum the middle rows
+            #return x[tr:],y.sum(axis=0)[tr:] # sum all CCD rows
+            #return x[tr:],y.transpose()[tr:] # full grid
+    else:
+        print 'No IP address provided'
+        print 'proceeding with FAKE DATA'
+        fetch = sampledata
 
     app = wx.PySimpleApp()
     app.frame = MainFrame(fetch)
