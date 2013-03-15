@@ -75,8 +75,8 @@ class Graph(wx.Panel):
 
         self.vbox = wx.BoxSizer(wx.VERTICAL)
         self.vbox.Add(self.canvas, 1, flag=wx.LEFT | wx.TOP | wx.GROW)
-        self.vbox.Add(self.hbox1, 0, flag=wx.ALIGN_LEFT | wx.TOP)
-        self.vbox.Add(self.hbox2, 0, flag=wx.ALIGN_LEFT | wx.TOP)
+        self.vbox.Add(self.hbox1, 0, flag=wx.ALIGN_LEFT | wx.TOP | wx.EXPAND)
+        self.vbox.Add(self.hbox2, 0, flag=wx.ALIGN_LEFT | wx.TOP | wx.EXPAND)
 
         self.SetSizer(self.vbox)
         self.vbox.Fit(self)
