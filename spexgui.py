@@ -36,7 +36,6 @@ class Spectrometer(wx.Panel):
 
         # the most basic control: change the wavelength
         self.move = SingleChoice(self, self.spec.wavelength, "Move to")
-        self.Bind(wx.EVT_BUTTON, self.meow, self.move.button)
         self.Bind(wx.EVT_BUTTON, self.on_move_button, self.move.button)
         sizer.Add(self.move, 0, wx.ALL, 10)
 
@@ -61,9 +60,6 @@ class Spectrometer(wx.Panel):
         self.wavelength = float(self.cal.field.GetValue())
         self.spec.calibrate(self.wavelength)
         self.update_label()
-
-    def meow(self,event):
-        print "MEOW"
 
 class MainFrame(wx.Frame):
 
