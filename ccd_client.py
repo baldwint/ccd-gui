@@ -10,6 +10,7 @@ from wanglib.instruments import spex750m
 from wanglib.ccd import labview_client
 import wx
 from argparse import ArgumentParser
+from numpy import array
 
 # define command line arguments
 parser = ArgumentParser(description=__doc__)
@@ -19,6 +20,18 @@ parser.add_argument('--spec', dest='spec_addr',  metavar='ADDRESS',
         help="Spectrometer RS232 address")
 parser.add_argument('--wl', dest='wl', type=int,
         help="Wavelength displayed in Spex750M window, in nm.")
+
+class Fake_Client(object):
+    """ Imitates a wanglib.ccd.labview_client object """
+
+    center_wl = 680
+
+    def get_spectrum(self):
+        grid = []
+        for i in range(10):
+            x,y = sampledata(self.center_wl)
+            grid.append(y)
+        return x, array(grid)
 
 class MainFrame(wx.Frame):
 
@@ -69,17 +82,17 @@ if __name__ == "__main__":
 
     if args.ip is not None:
         clnt = labview_client(center_wl=initial_wl, host=args.ip)
-
-        def fetch():
-            x,y = clnt.get_spectrum()
-            tr = 3  # truncate point
-            return x[tr:],y[6:9].sum(axis=0)[tr:] # only sum the middle rows
-            #return x[tr:],y.sum(axis=0)[tr:] # sum all CCD rows
-            #return x[tr:],y.transpose()[tr:] # full grid
     else:
         print 'No IP address provided'
         print 'proceeding with FAKE DATA'
-        fetch = sampledata
+        clnt = Fake_Client()
+
+    def fetch():
+        x,y = clnt.get_spectrum()
+        tr = 3  # truncate point
+        return x[tr:],y[6:9].sum(axis=0)[tr:] # only sum the middle rows
+        #return x[tr:],y.sum(axis=0)[tr:] # sum all CCD rows
+        #return x[tr:],y.transpose()[tr:] # full grid
 
     app = wx.PySimpleApp()
     app.frame = MainFrame(fetch, spec)
