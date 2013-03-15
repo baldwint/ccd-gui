@@ -80,6 +80,6 @@ class MainFrame(wx.Frame):
 
 if __name__ == "__main__":
     app = wx.PySimpleApp()
-    app.frame = MainFrame(spex750m(800))
+    app.frame = MainFrame(spex750m('/dev/ttyUSB1'))
     app.frame.Show()
     app.MainLoop()
