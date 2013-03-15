@@ -16,32 +16,16 @@ from argparse import ArgumentParser
 # to whatever is shown in the window.
 #spec = spex750m()
 
-# command line arguments
+# define command line arguments
 parser = ArgumentParser(description=__doc__)
 parser.add_argument('--ip', dest='ip', metavar='ADDRESS',
         help="IP address of the computer running the LabView program.")
 parser.add_argument('--wl', dest='wl', type=int,
         help="Wavelength displayed in Spex750M window, in nm.")
-args = parser.parse_args()
-
-print args.ip
-clnt = labview_client(center_wl=args.wl, host=args.ip)
-sumit = True
-pickit = True
-
-def fetch():
-    x,y = clnt.get_spectrum()
-    tr = 3  # truncate point
-    if pickit:
-        return x[tr:],y[6:9].sum(axis=0)[tr:]
-    elif sumit:
-        return x[tr:],y.sum(axis=0)[tr:]
-    else:
-        return x[tr:],y.transpose()[tr:]
 
 class MainFrame(wx.Frame):
 
-    def __init__(self):
+    def __init__(self, fetch):
         wx.Frame.__init__(self, None, -1, "CCD Client")
 
         self.disp = IntGraph(self,fetch)
@@ -73,7 +57,24 @@ class MainFrame(wx.Frame):
         print clnt.center_wl
 
 if __name__ == "__main__":
+    # get command line args
+    args = parser.parse_args()
+
+    clnt = labview_client(center_wl=args.wl, host=args.ip)
+    sumit = True
+    pickit = True
+
+    def fetch():
+        x,y = clnt.get_spectrum()
+        tr = 3  # truncate point
+        if pickit:
+            return x[tr:],y[6:9].sum(axis=0)[tr:]
+        elif sumit:
+            return x[tr:],y.sum(axis=0)[tr:]
+        else:
+            return x[tr:],y.transpose()[tr:]
+
     app = wx.PySimpleApp()
-    app.frame = MainFrame()
+    app.frame = MainFrame(fetch)
     app.frame.Show()
     app.MainLoop()
