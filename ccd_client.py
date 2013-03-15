@@ -1,20 +1,31 @@
+"""GUI client program for Jobin-Yvon CCD in the Wang Lab.
+
+Downloads spectra from the LabView CCD program running on another computer.
+"""
+
 from wx_mpl_dynamic_graph import GraphFrame
 from save import Graph,IntGraph
 #from spexgui import Spectrometer
 from wanglib.instruments import spex750m
 from wanglib.ccd import labview_client
 import wx
+from argparse import ArgumentParser
 
 # establish serial communication with the 750M.
 # hopefully its wl property is already calibrated
 # to whatever is shown in the window.
 #spec = spex750m()
 
-# temporarily just grab from command line
-from sys import argv
-wl = float(argv[1])
+# command line arguments
+parser = ArgumentParser(description=__doc__)
+parser.add_argument('--ip', dest='ip', metavar='ADDRESS',
+        help="IP address of the computer running the LabView program.")
+parser.add_argument('--wl', dest='wl', type=int,
+        help="Wavelength displayed in Spex750M window, in nm.")
+args = parser.parse_args()
 
-clnt = labview_client(center_wl = wl, host = "INSERT.IP.ADDRESS.HERE")
+print args.ip
+clnt = labview_client(center_wl=args.wl, host=args.ip)
 sumit = True
 pickit = True
 
