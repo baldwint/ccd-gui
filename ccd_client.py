@@ -35,8 +35,15 @@ class Fake_Client(object):
 
 class MainFrame(wx.Frame):
 
-    def __init__(self, fetch, spex=None):
+    def __init__(self, clnt, spex=None):
         wx.Frame.__init__(self, None, -1, "CCD Client")
+
+        def fetch():
+            x,y = clnt.get_spectrum()
+            tr = 3  # truncate point
+            return x[tr:],y[6:9].sum(axis=0)[tr:] # only sum the middle rows
+            #return x[tr:],y.sum(axis=0)[tr:] # sum all CCD rows
+            #return x[tr:],y.transpose()[tr:] # full grid
 
         self.disp = IntGraph(self,fetch)
         if spex is not None:
@@ -48,8 +55,8 @@ class MainFrame(wx.Frame):
             # note: to rebind something, use a "Bind" method
             # of the same instance from which it was bound before,
             # (hence self.control.Bind and not self.Bind below)
-            #self.control.Bind(wx.EVT_BUTTON, self.on_move_button, self.control.move.button)
-            #self.control.Bind(wx.EVT_BUTTON, self.on_cal_button, self.control.cal.button)
+            self.control.Bind(wx.EVT_BUTTON, self.on_move_button, self.control.move.button)
+            self.control.Bind(wx.EVT_BUTTON, self.on_cal_button, self.control.cal.button)
         
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.sizer.Add(self.disp, 1, flag=wx.LEFT | wx.TOP | wx.GROW)
@@ -57,16 +64,13 @@ class MainFrame(wx.Frame):
         self.SetSizer(self.sizer)
         self.sizer.Fit(self)
 
-# TODO: reinstate these once we have a reference to clnt
-#    def on_move_button(self,event):
-#        self.control.on_move_button(event)
-#        clnt.center_wl = spec.wavelength
-#        print clnt.center_wl
-#
-#    def on_cal_button(self,event):
-#        self.control.on_cal_button(event)
-#        clnt.center_wl = spec.wavelength
-#        print clnt.center_wl
+    def on_move_button(self,event):
+        self.control.on_move_button(event)
+        clnt.center_wl = spec.wavelength
+
+    def on_cal_button(self,event):
+        self.control.on_cal_button(event)
+        clnt.center_wl = spec.wavelength
 
 if __name__ == "__main__":
     # get command line args
@@ -87,14 +91,7 @@ if __name__ == "__main__":
         print 'proceeding with FAKE DATA'
         clnt = Fake_Client()
 
-    def fetch():
-        x,y = clnt.get_spectrum()
-        tr = 3  # truncate point
-        return x[tr:],y[6:9].sum(axis=0)[tr:] # only sum the middle rows
-        #return x[tr:],y.sum(axis=0)[tr:] # sum all CCD rows
-        #return x[tr:],y.transpose()[tr:] # full grid
-
     app = wx.PySimpleApp()
-    app.frame = MainFrame(fetch, spec)
+    app.frame = MainFrame(clnt, spec)
     app.frame.Show()
     app.MainLoop()
