@@ -14,13 +14,13 @@ import pylab as p
 import numpy as n
 from time import sleep
 
-def sampledata(around=680):
+def sampledata(around=680, with_peaks_at=(680,)):
     x = n.arange(128) - 64
     x = around + x* 150.0 / 128
     r = n.random.randn(len(x))
-    y = 10*n.exp(-(x - 680)**2 / 100)
-    y += r
-    return x,y
+    for loc in with_peaks_at:
+        r += 10*n.exp(-(x - loc)**2 / 100)
+    return x,r
 
 class Graph(wx.Panel):
 
