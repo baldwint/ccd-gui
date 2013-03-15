@@ -61,18 +61,16 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     clnt = labview_client(center_wl=args.wl, host=args.ip)
-    sumit = True
-    pickit = True
 
     def fetch():
         x,y = clnt.get_spectrum()
         tr = 3  # truncate point
-        if pickit:
-            return x[tr:],y[6:9].sum(axis=0)[tr:]
-        elif sumit:
-            return x[tr:],y.sum(axis=0)[tr:]
-        else:
-            return x[tr:],y.transpose()[tr:]
+        # only sum the middle rows
+        return x[tr:],y[6:9].sum(axis=0)[tr:]
+        # sum all CCD rows
+        #return x[tr:],y.sum(axis=0)[tr:]
+        # full grid
+        #return x[tr:],y.transpose()[tr:]
 
     app = wx.PySimpleApp()
     app.frame = MainFrame(fetch)
