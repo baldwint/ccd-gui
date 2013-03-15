@@ -28,8 +28,9 @@ class Fake_Client(object):
 
     def get_spectrum(self):
         grid = []
+        peak_locs = range(600, 1000, 100)
         for i in range(10):
-            x,y = sampledata(self.center_wl)
+            x,y = sampledata(self.center_wl, peak_locs)
             grid.append(y)
         return x, array(grid)
 
@@ -90,6 +91,8 @@ if __name__ == "__main__":
         print 'No IP address provided'
         print 'proceeding with FAKE DATA'
         clnt = Fake_Client()
+        if spec is not None:
+            clnt.center_wl = spec.wl
 
     app = wx.PySimpleApp()
     app.frame = MainFrame(clnt, spec)
