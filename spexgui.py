@@ -12,8 +12,8 @@ class SingleChoice(wx.Panel):
 
         # layout
         sizer = wx.BoxSizer(wx.HORIZONTAL)
-        sizer.Add(self.field, flag=wx.ALIGN_CENTER_VERTICAL)
-        sizer.Add(self.button, flag=wx.ALIGN_CENTER_VERTICAL)
+        sizer.Add(self.field, 1, flag=wx.ALIGN_CENTER_VERTICAL)
+        sizer.Add(self.button, 0, flag=wx.ALIGN_CENTER_VERTICAL)
 
         self.SetSizer(sizer)
         sizer.Fit(self)
@@ -37,13 +37,13 @@ class Spectrometer(wx.Panel):
         # the most basic control: change the wavelength
         self.move = SingleChoice(self, self.spec.wavelength, "Move to")
         self.Bind(wx.EVT_BUTTON, self.on_move_button, self.move.button)
-        sizer.Add(self.move, 0, wx.ALL, 10)
+        sizer.Add(self.move, 0, wx.ALL|wx.EXPAND, 10)
 
         # if there is a calibration method, provide a control for it
         if hasattr(self.spec,"calibrate"):
             self.cal = SingleChoice(self, self.spec.wavelength, "Calibrate")
             self.Bind(wx.EVT_BUTTON, self.on_cal_button, self.cal.button)
-            sizer.Add(self.cal, 0, wx.ALL, 10)
+            sizer.Add(self.cal, 0, wx.ALL|wx.EXPAND, 10)
 
         self.SetSizer(sizer)
         sizer.Fit(self)
