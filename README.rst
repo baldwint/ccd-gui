@@ -9,11 +9,6 @@ This program does not control the CCD directly, since the control
 hardware is incompatible with modern computers. Instead, it
 communicates with a LabView program over TCP-IP.
 
-Documentation
--------------
-
-Documentation is hosted at http://wanglib.readthedocs.org.
-
 Dependencies
 ------------
 
@@ -50,7 +45,7 @@ Start the CCD computer and follow the instructions in the README file
 on the desktop. Cooling the sensor down takes an hour or more.
 
 Once the LabView server program is running, find the IP address using
-`ipconfig` at a DOS prompt. Invoke the client, specifying the address
+``ipconfig`` at a DOS prompt. Invoke the client, specifying the address
 of the server::
 
     python ccd_client.py --ip 128.223.xxx.xxx
@@ -59,13 +54,13 @@ Optionally, you can also connect the spectrometer via RS-232::
 
     python ccd_client.py --ip 128.223.xxx.xxx --spec /dev/ttyUSB0
 
-Change `/dev/ttyUSB0` to the serial port you are using. On Windows,
-this will look like `COM1`.
+Change ``/dev/ttyUSB0`` to the serial port you are using. On Windows,
+this will look like ``COM1``.
 
 If you do not connect to the spectrometer, you will not be able to
 move the grating. This may be fine, but you should provide the center
 wavelength (as read from the 750M window) so that the x axis is
-properly calibrated.
+properly calibrated::
 
     python ccd_client.py --ip 128.223.xxx.xxx --wl 800
 
