@@ -19,7 +19,7 @@ parser.add_argument('--ip', dest='ip', metavar='ADDRESS',
 parser.add_argument('--spec', dest='spec_addr',  metavar='ADDRESS',
         help="Spectrometer RS232 address")
 parser.add_argument('--wl', dest='wl', type=int,
-        help="Wavelength displayed in Spex750M window, in nm.")
+        help="If --spec is not given, provide the wavelength displayed in Spex750M window, in nm.")
 
 class Fake_Client(object):
     """ Imitates a wanglib.ccd.labview_client object """
