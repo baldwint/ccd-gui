@@ -15,13 +15,13 @@ import numpy as n
 from time import sleep
 import threading
 
-def sampledata(around=680, with_peaks_at=(680,)):
+def sampledata(around=680, with_peaks_at=(680,), lag=.2):
     x = n.arange(128) - 64
     x = around + x* 150.0 / 128
     r = n.random.randn(len(x))
     for loc in with_peaks_at:
         r += 10*n.exp(-(x - loc)**2 / 100)
-    sleep(.2)
+    sleep(lag)
     return x,r
 
 # threading code mostly stolen from http://wiki.wxpython.org/LongRunningTasks
@@ -183,7 +183,6 @@ class Graph(wx.Panel):
         self.worker._want_abort = True if self.paused else False
         if not self.paused:
             self.start_worker()
-        print 'pause button pressed'
 
     def on_update_pause_button(self,event):
         label = "Resume" if self.paused else "Pause"
@@ -217,7 +216,7 @@ class MainFrame(wx.Frame):
     
     def __init__(self,datasource):
         wx.Frame.__init__(self, None, -1, self.title)
-        self.panel = Graph(self,datasource)
+        self.panel = IntGraph(self,datasource)
 
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.sizer.Add(self.panel, 1, wx.EXPAND)

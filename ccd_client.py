@@ -30,7 +30,7 @@ class Fake_Client(object):
         grid = []
         peak_locs = range(600, 1000, 100)
         for i in range(10):
-            x,y = sampledata(self.center_wl, peak_locs)
+            x,y = sampledata(self.center_wl, peak_locs, lag=.02)
             grid.append(y)
         return x, array(grid)
 
