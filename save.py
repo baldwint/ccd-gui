@@ -44,7 +44,6 @@ class WorkerThread(threading.Thread):
         """Run Worker Thread."""
         # This is the code executing in the new thread. 
         # peek at the abort variable once in a while to see if we should stop
-        # TODO: send _want_abort
         while True:
             if self._want_abort:
                 # Use a result of None to acknowledge the abort
@@ -66,12 +65,15 @@ class Graph(wx.Panel):
 
         self.datagen = datasource
         self.create_main_panel()
-        self.paused = False
 
-        self.worker = WorkerThread(self, self.datagen)
-        self.worker.start()
+        self.paused = False
+        self.start_worker()
 
         self.Bind(EVT_RESULT, self.on_result)
+
+    def start_worker(self):
+        self.worker = WorkerThread(self, self.datagen)
+        self.worker.start()
 
     def create_control_bar(self):
         self.pause_button = wx.Button(self, -1, "Pause")
@@ -128,7 +130,6 @@ class Graph(wx.Panel):
 
     def on_result(self, event):
         if event.data is None:
-            #TODO
             pass
         else:
             x,y = event.data
@@ -177,12 +178,14 @@ class Graph(wx.Panel):
                 y = self.lines[i].get_ydata()
                 wrt.writerow(y)
 
-
     def on_pause_button(self,event):
         self.paused = not self.paused
+        self.worker._want_abort = True if self.paused else False
+        if not self.paused:
+            self.start_worker()
+        print 'pause button pressed'
 
     def on_update_pause_button(self,event):
-        self.worker._want_abort = True if self.paused else False
         label = "Resume" if self.paused else "Pause"
         self.pause_button.SetLabel(label)
 
@@ -190,17 +193,6 @@ class IntGraph(Graph):
     def __init__(self, parent, datasource):
         Graph.__init__(self,parent,datasource)
         self.integrating = False
-
-    def on_result(self, event):
-        if event.data is None:
-            #TODO
-            pass
-        else:
-            x,y = event.data
-            if self.integrating:
-                y+= self.lines[0].get_ydata()
-            self.lines = self.update_plot(x,y)
-            self.set_bounds()
 
     def update_plot(self, x, y):
         if self.integrating:
