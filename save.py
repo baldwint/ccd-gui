@@ -13,6 +13,7 @@ from wx_mpl_dynamic_graph import BoundControlBox
 import pylab as p
 import numpy as n
 from time import sleep
+import threading
 
 def sampledata(around=680, with_peaks_at=(680,)):
     x = n.arange(128) - 64
@@ -20,7 +21,43 @@ def sampledata(around=680, with_peaks_at=(680,)):
     r = n.random.randn(len(x))
     for loc in with_peaks_at:
         r += 10*n.exp(-(x - loc)**2 / 100)
+    sleep(.2)
     return x,r
+
+# threading code mostly stolen from http://wiki.wxpython.org/LongRunningTasks
+
+# Define notification event for thread completion
+import wx.lib.newevent
+ResultEvent, EVT_RESULT = wx.lib.newevent.NewEvent()
+
+# Thread class that executes processing
+class WorkerThread(threading.Thread):
+    """Worker Thread Class."""
+    def __init__(self, notify_window, func):
+        """Init Worker Thread Class."""
+        threading.Thread.__init__(self)
+        self.func = func
+        self._notify_window = notify_window
+        self._want_abort = 0
+
+    def run(self):
+        """Run Worker Thread."""
+        # This is the code executing in the new thread. 
+        # peek at the abort variable once in a while to see if we should stop
+        # TODO: send _want_abort
+        while True:
+            if self._want_abort:
+                # Use a result of None to acknowledge the abort
+                wx.PostEvent(self._notify_window, ResultEvent(data=None))
+                return
+            # Send data to the parent thread
+            data = self.func()
+            wx.PostEvent(self._notify_window, ResultEvent(data=data))
+
+    def abort(self):
+        """abort worker thread."""
+        # Method for use by main thread to signal an abort
+        self._want_abort = 1
 
 class Graph(wx.Panel):
 
@@ -31,10 +68,10 @@ class Graph(wx.Panel):
         self.create_main_panel()
         self.paused = False
 
-        self.redraw_timer = wx.Timer(self)
-        self.Bind(wx.EVT_TIMER, self.on_redraw_timer, self.redraw_timer)
-        self.redraw_timer.Start(100)
+        self.worker = WorkerThread(self, self.datagen)
+        self.worker.start()
 
+        self.Bind(EVT_RESULT, self.on_result)
 
     def create_control_bar(self):
         self.pause_button = wx.Button(self, -1, "Pause")
@@ -89,8 +126,16 @@ class Graph(wx.Panel):
         x,y = self.datagen()
         self.lines = self.axes.plot(x,y)
 
-    def update_plot(self):
-        x,y = self.datagen()
+    def on_result(self, event):
+        if event.data is None:
+            #TODO
+            pass
+        else:
+            x,y = event.data
+            self.update_plot(x,y)
+            self.set_bounds()
+
+    def update_plot(self, x, y):
         self.lines = self.axes.plot(x,y)
         self.set_bounds()
 
@@ -137,20 +182,27 @@ class Graph(wx.Panel):
         self.paused = not self.paused
 
     def on_update_pause_button(self,event):
+        self.worker._want_abort = True if self.paused else False
         label = "Resume" if self.paused else "Pause"
         self.pause_button.SetLabel(label)
-
-    def on_redraw_timer(self,event):
-        if not self.paused:
-            self.update_plot()
 
 class IntGraph(Graph):
     def __init__(self, parent, datasource):
         Graph.__init__(self,parent,datasource)
         self.integrating = False
 
-    def update_plot(self):
-        x,y = self.datagen()
+    def on_result(self, event):
+        if event.data is None:
+            #TODO
+            pass
+        else:
+            x,y = event.data
+            if self.integrating:
+                y+= self.lines[0].get_ydata()
+            self.lines = self.update_plot(x,y)
+            self.set_bounds()
+
+    def update_plot(self, x, y):
         if self.integrating:
             y+= self.lines[0].get_ydata()
         self.lines = self.axes.plot(x,y)
@@ -173,7 +225,7 @@ class MainFrame(wx.Frame):
     
     def __init__(self,datasource):
         wx.Frame.__init__(self, None, -1, self.title)
-        self.panel = IntGraph(self,datasource)
+        self.panel = Graph(self,datasource)
 
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.sizer.Add(self.panel, 1, wx.EXPAND)
