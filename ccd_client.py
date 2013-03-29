@@ -47,6 +47,8 @@ class MainFrame(wx.Frame):
             #return x[tr:],y.transpose()[tr:] # full grid
 
         self.disp = IntGraph(self,fetch)
+        self.centerline = None
+
         if spex is not None:
             self.control = Spectrometer(self,spec)
             self.disp.hbox2.Add(self.control, 1, border=5, flag=wx.ALL|wx.EXPAND)
@@ -58,6 +60,9 @@ class MainFrame(wx.Frame):
             # (hence self.control.Bind and not self.Bind below)
             self.control.Bind(wx.EVT_BUTTON, self.on_move_button, self.control.move.button)
             self.control.Bind(wx.EVT_BUTTON, self.on_cal_button, self.control.cal.button)
+
+            # draw center line
+            self.draw_centerline()
         
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.sizer.Add(self.disp, 1, flag=wx.LEFT | wx.TOP | wx.GROW)
@@ -68,10 +73,18 @@ class MainFrame(wx.Frame):
     def on_move_button(self,event):
         self.control.on_move_button(event)
         clnt.center_wl = spec.wavelength
+        self.draw_centerline()
 
     def on_cal_button(self,event):
         self.control.on_cal_button(event)
         clnt.center_wl = spec.wavelength
+        self.draw_centerline()
+
+    def draw_centerline(self):
+        if self.centerline is not None:
+            self.centerline.remove()
+        self.centerline = self.disp.axes.axvline(spec.wl, c='k', ls='--')
+
 
 if __name__ == "__main__":
     # get command line args
