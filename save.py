@@ -123,7 +123,6 @@ class Graph(wx.Panel):
     def init_plot(self):
         self.fig = matplotlib.figure.Figure()
         self.axes = self.fig.add_subplot(111)
-        self.axes.hold(False)
         
         x,y = self.datagen()
         self.lines = self.axes.plot(x,y)
@@ -137,8 +136,9 @@ class Graph(wx.Panel):
             self.set_bounds()
 
     def update_plot(self, x, y):
-        self.lines = self.axes.plot(x,y)
-        self.set_bounds()
+        self.lines[0].set_data(x,y)
+        self.axes.relim()
+        self.axes.autoscale_view()
 
     def set_bounds(self):
         if not self.xmax_control.is_auto():
@@ -196,9 +196,8 @@ class IntGraph(Graph):
     def update_plot(self, x, y):
         if self.integrating:
             y+= self.lines[0].get_ydata()
-        self.lines = self.axes.plot(x,y)
-        self.set_bounds()
-        
+        super(IntGraph, self).update_plot(x, y)
+
     def create_control_bar(self):
         Graph.create_control_bar(self)
         self.int_button= wx.Button(self, -1, "Integration")
