@@ -41,10 +41,9 @@ class MainFrame(wx.Frame):
 
         def fetch():
             x,y = clnt.get_spectrum()
+            y = y.sum(axis=0) # collapse to 1D
             tr = 3  # truncate point
-            return x[tr:],y[6:9].sum(axis=0)[tr:] # only sum the middle rows
-            #return x[tr:],y.sum(axis=0)[tr:] # sum all CCD rows
-            #return x[tr:],y.transpose()[tr:] # full grid
+            return x[tr:], y[tr:]
 
         self.disp = IntGraph(self,fetch)
         self.centerline = None
