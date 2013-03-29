@@ -160,7 +160,7 @@ class Graph(wx.Panel):
     # define event handlers
 
     def on_save_button(self, event):
-        file_choices = "CSV (*.csv)|*.csv"
+        file_choices = "CSV (*.csv)|*.csv|Numpy (*.npy)|*.npy"
         dlg = wx.FileDialog(
             self,
             message="Save data as...",
@@ -171,13 +171,34 @@ class Graph(wx.Panel):
 
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
-            wrt = csv.writer(open(path,'w'))
-            def cols(lines):
-                for line in lines:
-                    yield line.get_xdata()
-                    yield line.get_ydata()
-            for row in zip(*cols(self.lines)):
-                wrt.writerow(row)
+            # verify extension
+            extensions = ('.csv', '.npy')
+            ext = extensions[dlg.GetFilterIndex()]
+            if type(path) is unicode:
+                ext = unicode(ext)
+            base, userext = os.path.splitext(path)
+            if not userext == ext:
+                path += ext
+            if str(ext) == '.csv':
+                self.save_csv(path)
+            elif str(ext) == '.npy':
+                self.save_npy(path)
+
+    def save_csv(self, path):
+        wrt = csv.writer(open(path,'w'))
+        def cols(lines):
+            for line in lines:
+                yield line.get_xdata()
+                yield line.get_ydata()
+        for row in zip(*cols(self.lines)):
+            wrt.writerow(row)
+
+    def save_npy(self, path):
+        lines = self.lines
+        if len(lines) == 1:
+            n.save(path, lines[0].get_data())
+        else:
+            n.save(path, [l.get_data() for l in lines])
 
     def on_pause_button(self,event):
         self.paused = not self.paused
