@@ -172,11 +172,12 @@ class Graph(wx.Panel):
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             wrt = csv.writer(open(path,'w'))
-            for i in range(len(self.lines)):
-                x = self.lines[i].get_xdata()
-                wrt.writerow(x)
-                y = self.lines[i].get_ydata()
-                wrt.writerow(y)
+            def cols(lines):
+                for line in lines:
+                    yield line.get_xdata()
+                    yield line.get_ydata()
+            for row in zip(*cols(self.lines)):
+                wrt.writerow(row)
 
     def on_pause_button(self,event):
         self.paused = not self.paused
