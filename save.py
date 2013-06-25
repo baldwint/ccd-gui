@@ -16,8 +16,8 @@ from time import sleep
 import threading
 
 def sampledata(around=680, with_peaks_at=(680,), lag=.2):
-    x = n.arange(128) - 64
-    x = around + x* 150.0 / 128
+    x = n.arange(1024) - 512
+    x = around + x* 150.0 / 512
     r = n.random.randn(len(x))
     for loc in with_peaks_at:
         r += 10*n.exp(-(x - loc)**2 / 100)
