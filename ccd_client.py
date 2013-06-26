@@ -4,7 +4,7 @@ Downloads spectra from the LabView CCD program running on another computer.
 """
 
 from wx_mpl_dynamic_graph import GraphFrame
-from save import Graph, IntGraph, sampledata
+from save import SpecGraph, sampledata
 from spexgui import Spectrometer
 from wanglib.instruments import spex750m
 from wanglib.ccd import labview_client
@@ -45,7 +45,7 @@ class MainFrame(wx.Frame):
             tr = 3  # truncate point
             return x[tr:], y[tr:]
 
-        self.disp = IntGraph(self,fetch)
+        self.disp = SpecGraph(self,fetch)
         self.centerline = None
 
         if spex is not None:

@@ -230,6 +230,16 @@ class IntGraph(Graph):
     def on_int_button(self,event):
         self.integrating = not self.integrating
 
+class SpecGraph(IntGraph):
+
+    def init_plot(self):
+        super(SpecGraph, self).init_plot()
+
+        # add a second x axis enumerated in eV
+        xconv = lambda wl: 1240. / wl
+        self.axes2 = self.axes.twiny()
+        self.axes2.set_xlim(xconv(x) for x in self.axes.get_xlim())
+
 
 class MainFrame(wx.Frame):
 
