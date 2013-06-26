@@ -10,7 +10,7 @@ from wanglib.instruments import spex750m
 from wanglib.ccd import labview_client
 import wx
 from argparse import ArgumentParser
-from numpy import array
+import numpy
 
 # define command line arguments
 parser = ArgumentParser(description=__doc__)
@@ -32,7 +32,58 @@ class Fake_Client(object):
         for i in range(10):
             x,y = sampledata(self.center_wl, peak_locs, lag=.02)
             grid.append(y)
-        return x, array(grid)
+        return x, numpy.array(grid)
+
+class CalData(wx.Panel):
+    def __init__(self, parent):
+        wx.Panel.__init__(self, parent, -1)
+
+        # arrange controls vertically
+        self.box = wx.StaticBox(self, -1)
+        self.box.SetLabel('Reference lines')
+        sizer = wx.StaticBoxSizer(self.box, wx.VERTICAL)
+
+        # add checkboxes
+        self.ne = wx.CheckBox(self, -1, 'Ne')
+        sizer.Add(self.ne, 0, flag=wx.ALIGN_CENTER_VERTICAL)
+        self.ar = wx.CheckBox(self, -1, 'Ar')
+        sizer.Add(self.ar, 0, flag=wx.ALIGN_CENTER_VERTICAL)
+
+        # bind to events
+        self.Bind(wx.EVT_CHECKBOX, self.on_ne, self.ne)
+        self.Bind(wx.EVT_CHECKBOX, self.on_ar, self.ar)
+
+        self.SetSizer(sizer)
+        sizer.Fit(self)
+
+    data = None
+
+    @staticmethod
+    def read_NIST(filename):
+        """
+        ascii data from http://physics.nist.gov/cgi-bin/ASD/lines1.pl
+
+        columns of returned array are observed wl, relative int, and aki (?)
+        """
+        a = numpy.genfromtxt(filename, delimiter='|',
+                skip_header=6, skip_footer=1)
+        data = a[:,1:4] # select location, relative int, and aki (?)
+        mask = numpy.isnan(data[:,0]) # some lines are blank
+        return data[~mask]
+
+    def on_ar(self, event):
+        if event.Checked():
+            #load up the data
+            wls, rel_int, aki = self.read_NIST('caldata/Ar.txt').T
+            self.data = wls[rel_int > 1e4]
+        event.Skip() # pass it up the chain
+
+    def on_ne(self, event):
+        if event.Checked():
+            #load up the data
+            wls, rel_int, aki = self.read_NIST('caldata/Ne.txt').T
+            self.data = wls[rel_int > 1e4]
+        event.Skip() # pass it up the chain
 
 class MainFrame(wx.Frame):
 
@@ -47,6 +98,13 @@ class MainFrame(wx.Frame):
 
         self.disp = SpecGraph(self,fetch)
         self.centerline = None
+        self.spexlines = {}
+
+        # cal data viewer
+        self.caldata = CalData(self)
+        self.disp.hbox2.Add(self.caldata, 1, border=5, flag=wx.ALL)
+        self.Bind(wx.EVT_CHECKBOX, self.on_ne_checkbox, self.caldata.ne)
+        self.Bind(wx.EVT_CHECKBOX, self.on_ar_checkbox, self.caldata.ar)
 
         if spex is not None:
             self.control = Spectrometer(self,spec)
@@ -62,7 +120,7 @@ class MainFrame(wx.Frame):
 
             # draw center line
             self.draw_centerline()
-        
+
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.sizer.Add(self.disp, 1, flag=wx.LEFT | wx.TOP | wx.GROW)
 
@@ -83,6 +141,23 @@ class MainFrame(wx.Frame):
         if self.centerline is not None:
             self.centerline.remove()
         self.centerline = self.disp.axes.axvline(spec.wl, c='k', ls='--')
+
+    def on_ne_checkbox(self, event):
+        if event.Checked():
+            self.spexlines['Ne'] = self.draw_spexlines(self.caldata.data, 'r')
+        else:
+            for line in self.spexlines['Ne']:
+                line.remove()
+
+    def on_ar_checkbox(self, event):
+        if event.Checked():
+            self.spexlines['Ar'] = self.draw_spexlines(self.caldata.data, 'm')
+        else:
+            for line in self.spexlines['Ar']:
+                line.remove()
+
+    def draw_spexlines(self, locs, color):
+        return [self.disp.axes.axvline(wl, c=color, ls=':') for wl in locs]
 
 
 if __name__ == "__main__":
