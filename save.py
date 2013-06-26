@@ -167,7 +167,7 @@ class Graph(wx.Panel):
             defaultDir = os.getcwd(),
             defaultFile = "data.csv",
             wildcard=file_choices,
-            style=wx.SAVE)
+            style=wx.SAVE|wx.OVERWRITE_PROMPT)
 
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
