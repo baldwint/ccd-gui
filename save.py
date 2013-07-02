@@ -10,7 +10,6 @@ matplotlib.use('WXAgg',warn=False)
 from matplotlib.backends.backend_wxagg import \
         FigureCanvasWxAgg as FigCanvas
 from wx_mpl_dynamic_graph import BoundControlBox
-import pylab as p
 import numpy as n
 from time import sleep
 import threading
