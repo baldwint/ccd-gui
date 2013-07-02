@@ -7,7 +7,7 @@ from wx_mpl_dynamic_graph import GraphFrame
 from save import SpecGraph, sampledata
 from spexgui import Spectrometer
 from wanglib.instruments import spex750m
-from wanglib.ccd import labview_client
+from wanglib.ccd import labview_client, InstrumentError
 import wx
 from argparse import ArgumentParser
 import numpy
@@ -91,7 +91,11 @@ class MainFrame(wx.Frame):
         wx.Frame.__init__(self, None, -1, "CCD Client")
 
         def fetch():
-            x,y = clnt.get_spectrum()
+            try:
+                x,y = clnt.get_spectrum()
+            except InstrumentError:
+                clnt.connect() # try reconnecting
+                x,y = clnt.get_spectrum()
             y = y.sum(axis=0) # collapse to 1D
             tr = 3  # truncate point
             return x[tr:], y[tr:]
