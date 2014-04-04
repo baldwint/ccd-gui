@@ -75,7 +75,13 @@ class MainFrame(wx.Frame):
         self.sizer.Fit(self)
 
 if __name__ == "__main__":
+    import sys
+    if len(sys.argv) < 2:
+        print("supply spex address as positional argument")
+        sys.exit()
+    else:
+        addr = sys.argv[1]
     app = wx.PySimpleApp()
-    app.frame = MainFrame(spex750m('/dev/ttyUSB1'))
+    app.frame = MainFrame(spex750m(addr))
     app.frame.Show()
     app.MainLoop()
