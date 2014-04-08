@@ -120,7 +120,9 @@ class MainFrame(wx.Frame):
             # of the same instance from which it was bound before,
             # (hence self.control.Bind and not self.Bind below)
             self.control.Bind(wx.EVT_BUTTON, self.on_move_button, self.control.move.button)
+            self.control.Bind(wx.EVT_TEXT_ENTER, self.on_move_button, self.control.move.field)
             self.control.Bind(wx.EVT_BUTTON, self.on_cal_button, self.control.cal.button)
+            self.control.Bind(wx.EVT_TEXT_ENTER, self.on_cal_button, self.control.cal.field)
 
             # draw center line
             self.draw_centerline()

@@ -7,7 +7,8 @@ class SingleChoice(wx.Panel):
         
         # controls
         self.field = wx.TextCtrl(self, -1, size = (35,-1),
-                                           value = str(initval))
+                                 value = str(initval),
+                                 style=wx.TE_PROCESS_ENTER)
         self.button = wx.Button(self, -1, buttontext)
 
         # layout
@@ -37,12 +38,14 @@ class Spectrometer(wx.Panel):
         # the most basic control: change the wavelength
         self.move = SingleChoice(self, self.spec.wavelength, "Move to")
         self.Bind(wx.EVT_BUTTON, self.on_move_button, self.move.button)
+        self.Bind(wx.EVT_TEXT_ENTER, self.on_move_button, self.move.field)
         sizer.Add(self.move, 0, wx.ALL|wx.EXPAND, 10)
 
         # if there is a calibration method, provide a control for it
         if hasattr(self.spec,"calibrate"):
             self.cal = SingleChoice(self, self.spec.wavelength, "Calibrate")
             self.Bind(wx.EVT_BUTTON, self.on_cal_button, self.cal.button)
+            self.Bind(wx.EVT_TEXT_ENTER, self.on_cal_button, self.cal.field)
             sizer.Add(self.cal, 0, wx.ALL|wx.EXPAND, 10)
 
         self.SetSizer(sizer)
