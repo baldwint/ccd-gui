@@ -84,7 +84,7 @@ if __name__ == "__main__":
         sys.exit()
     else:
         addr = sys.argv[1]
-    app = wx.PySimpleApp()
+    app = wx.App(False)
     app.frame = MainFrame(spex750m(addr))
     app.frame.Show()
     app.MainLoop()

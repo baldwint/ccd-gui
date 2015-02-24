@@ -187,7 +187,7 @@ if __name__ == "__main__":
         if spec is not None:
             clnt.center_wl = spec.wl
 
-    app = wx.PySimpleApp()
+    app = wx.App(False)
     app.frame = MainFrame(clnt, spec)
     app.frame.Show()
     app.MainLoop()
