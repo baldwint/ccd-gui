@@ -65,8 +65,8 @@ class Graph(wx.Panel):
         self.datagen = datasource
         self.create_main_panel()
 
-        self.paused = False
-        self.start_worker()
+        self.paused = True
+        #self.start_worker()
 
         self.Bind(EVT_RESULT, self.on_result)
 
@@ -201,9 +201,10 @@ class Graph(wx.Panel):
 
     def on_pause_button(self,event):
         self.paused = not self.paused
-        self.worker._want_abort = True if self.paused else False
         if not self.paused:
             self.start_worker()
+        else:
+            self.worker._want_abort = True
 
     def on_update_pause_button(self,event):
         label = "Resume" if self.paused else "Pause"
