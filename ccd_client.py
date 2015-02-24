@@ -44,9 +44,9 @@ class CalData(wx.Panel):
         sizer = wx.StaticBoxSizer(self.box, wx.VERTICAL)
 
         # add checkboxes
-        self.ne = wx.CheckBox(self, -1, 'Ne')
+        self.ne = wx.CheckBox(self, label='Ne')
         sizer.Add(self.ne, 0, flag=wx.ALIGN_CENTER_VERTICAL)
-        self.ar = wx.CheckBox(self, -1, 'Ar')
+        self.ar = wx.CheckBox(self, label='Ar')
         sizer.Add(self.ar, 0, flag=wx.ALIGN_CENTER_VERTICAL)
 
         # bind to events
@@ -104,15 +104,17 @@ class MainFrame(wx.Frame):
         self.centerline = None
         self.spexlines = {}
 
+        self.sidebar = wx.BoxSizer(wx.VERTICAL)
+
         # cal data viewer
         self.caldata = CalData(self)
-        self.disp.hbox2.Add(self.caldata, 1, border=5, flag=wx.ALL)
+        self.sidebar.Add(self.caldata, 1, border=5, flag=wx.ALL)
         self.Bind(wx.EVT_CHECKBOX, self.on_ne_checkbox, self.caldata.ne)
         self.Bind(wx.EVT_CHECKBOX, self.on_ar_checkbox, self.caldata.ar)
 
         if spex is not None:
             self.control = Spectrometer(self,spec)
-            self.disp.hbox2.Add(self.control, 1, border=5, flag=wx.ALL|wx.EXPAND)
+            self.sidebar.Add(self.control, 1, border=5, flag=wx.ALL|wx.EXPAND)
 
             # re-bind the buttons to new methods defined below.
             # this is necessary to inform the ccd program
@@ -127,8 +129,9 @@ class MainFrame(wx.Frame):
             # draw center line
             self.draw_centerline()
 
-        self.sizer = wx.BoxSizer(wx.VERTICAL)
+        self.sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.sizer.Add(self.disp, 1, flag=wx.LEFT | wx.TOP | wx.GROW)
+        self.sizer.Add(self.sidebar, 0, border=5, flag=wx.ALL)
 
         self.SetSizer(self.sizer)
         self.sizer.Fit(self)
