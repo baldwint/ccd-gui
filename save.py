@@ -234,11 +234,19 @@ class SpecGraph(IntGraph):
 
     def init_plot(self):
         super(SpecGraph, self).init_plot()
+        self.add_dualtick()
 
+    def add_dualtick(self):
         # add a second x axis enumerated in eV
         xconv = lambda wl: 1240. / wl
         self.axes2 = self.axes.twiny()
         self.axes2.set_xlim(xconv(x) for x in self.axes.get_xlim())
+        self.axes2.set_ylim(self.axes.get_ylim())
+
+    def update_plot(self, x, y):
+        self.axes.figure.delaxes(self.axes2)
+        super(SpecGraph, self).update_plot(x, y)
+        self.add_dualtick()
 
 
 class MainFrame(wx.Frame):
