@@ -166,7 +166,9 @@ class MainFrame(wx.Frame):
                 line.remove()
 
     def draw_spexlines(self, locs, color):
-        return [self.disp.axes.axvline(wl, c=color, ls=':') for wl in locs]
+        wlmin, wlmax = self.disp.axes.get_xlim()
+        nearlocs = [wl for wl in locs if (wl > wlmin and wl < wlmax)]
+        return [self.disp.axes.axvline(wl, c=color, ls=':') for wl in nearlocs]
 
 
 if __name__ == "__main__":
